@@ -1,11 +1,17 @@
 import pandas as pd
 import ast
+import os  # Import os module
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+# Define base directory and paths for datasets
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MOVIES_PATH = os.path.join(BASE_DIR, 'dataset', 'tmdb_5000_movies.csv')
+CREDITS_PATH = os.path.join(BASE_DIR, 'dataset', 'tmdb_5000_credits.csv')
+
 # Load datasets
-movies = pd.read_csv('dataset/tmdb_5000_movies.csv')
-credits = pd.read_csv('dataset/tmdb_5000_credits.csv')
+movies = pd.read_csv(MOVIES_PATH)
+credits = pd.read_csv(CREDITS_PATH)
 
 credits.columns = ['id', 'title', 'cast', 'crew']
 movies = movies.merge(credits, on='title')
