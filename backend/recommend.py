@@ -6,6 +6,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 # Load datasets
 movies = pd.read_csv('dataset/tmdb_5000_movies.csv')
 credits = pd.read_csv('dataset/tmdb_5000_credits.csv')
+
 credits.columns = ['id', 'title', 'cast', 'crew']
 movies = movies.merge(credits, on='title')
 movies.rename(columns={'id_x': 'movie_id'}, inplace=True)
