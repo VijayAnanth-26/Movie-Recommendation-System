@@ -1,33 +1,89 @@
 import streamlit as st
 from recommend import recommend, get_all_genres
 
-st.set_page_config(page_title="Movie Recommender", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="🎬 Movie Recommender", page_icon="🎥", layout="wide")
 
-st.title('🎬 Movie Recommendation System')
-st.subheader("Welcome! Enter a movie you like and discover similar ones.")
+# --- Dark Theme Styling ---
+st.markdown("""
+    <style>
+    body {
+        background-color: #121212;
+        color: #ffffff;
+    }
+    .stApp {
+        background-color: #121212;
+    }
+    .title-style {
+        color: #ffffff;
+        font-size: 42px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 0.3em;
+    }
+    .subtitle-style {
+        color: #bbbbbb;
+        font-size: 18px;
+        text-align: center;
+        margin-top: -1em;
+        margin-bottom: 1.5em;
+    }
+    .movie-box {
+        background-color: #1f1f1f;
+        padding: 1.2em;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #333;
+        box-shadow: 0px 0px 10px rgba(255,255,255,0.05);
+    }
+    .stTextInput > div > div > input {
+        background-color: #2c2c2c;
+        color: #ffffff;
+        border: 1px solid #444;
+    }
+    .stSelectbox > div > div {
+        background-color: #2c2c2c !important;
+        color: #ffffff !important;
+    }
+    .stButton>button {
+        background-color: #444444;
+        color: white;
+        border-radius: 8px;
+        border: none;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-# Input movie name
-movie_name = st.text_input('🔍 Enter a Movie Name:', placeholder="e.g. Inception")
+# --- Header ---
+st.markdown('<div class="title-style">🎬 Movie Recommendation System</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle-style">Enter a movie you like, and get 5 similar ones recommended instantly!</div>', unsafe_allow_html=True)
 
-# Genre dropdown
+# --- Input Section ---
+movie_name = st.text_input('🔍 Enter a Movie Name', placeholder="e.g. Inception, Titanic, The Matrix")
+
 genres = get_all_genres()
 selected_genre = st.selectbox("🎯 Filter by Genre (Optional):", options=["All"] + genres)
 
-# Recommend button
-if st.button("Recommend"):
+col1, col2 = st.columns([1, 5])
+with col1:
+    recommend_clicked = st.button("🚀 Recommend")
+
+# --- Output Section ---
+if recommend_clicked:
     if movie_name:
-        with st.spinner("Fetching recommendations..."):
+        with st.spinner("🔎 Finding similar movies..."):
             genre_filter = None if selected_genre == "All" else selected_genre
             recommendations = recommend(movie_name, selected_genre=genre_filter)
 
         if recommendations[0] == "Movie not found!":
             st.error("❌ Movie not found! Please try a different title.")
         else:
-            st.success(f"💡 Top 5 movies similar to '{movie_name.title()}'" +
-                       (f" in genre '{selected_genre}'" if genre_filter else "") + ":")
-            cols = st.columns(2)
+            st.markdown("---")
+            st.success(f"🎉 Top 5 Recommendations for **'{movie_name.title()}'**" +
+                       (f" in genre **'{selected_genre}'**" if genre_filter else "") + ":")
+
             for idx, title in enumerate(recommendations, 1):
-                with cols[idx % 2]:
-                    st.markdown(f"**{idx}. {title}**")
+                st.markdown(f"""<div class="movie-box">
+                    <h5>🎬 {idx}. {title}</h5>
+                </div>""", unsafe_allow_html=True)
     else:
-        st.warning("Please enter a movie name to get recommendations.")
+        st.warning("⚠️ Please enter a movie name to get recommendations.")
