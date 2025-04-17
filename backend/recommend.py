@@ -40,7 +40,7 @@ movies['crew'] = movies['crew'].apply(fetch_director)
 movies['overview'] = movies['overview'].apply(lambda x: x.split())
 movies['tags'] = movies['overview'] + movies['genres'] + movies['keywords'] + movies['cast'] + movies['crew']
 
-new_df = movies[['movie_id', 'title', 'tags', 'genres']]
+new_df = movies[['movie_id', 'title', 'tags']]
 new_df.loc[:, 'tags'] = new_df['tags'].apply(lambda x: " ".join(x)).str.lower()
 
 # Vectorization
@@ -49,7 +49,7 @@ vectors = cv.fit_transform(new_df['tags']).toarray()
 similarity = cosine_similarity(vectors)
 
 # --- Recommend function ---
-def recommend(movie, selected_genre=None):
+def recommend(movie):
     movie = movie.lower()
     if movie not in new_df['title'].str.lower().values:
         return ["Movie not found!"]
@@ -61,16 +61,7 @@ def recommend(movie, selected_genre=None):
     recommendations = []
     for i in distances[1:]:
         title = new_df.iloc[i[0]].title
-        genres = new_df.iloc[i[0]].genres
-        if selected_genre is None or selected_genre in genres:
-            recommendations.append(title)
+        recommendations.append(title)
         if len(recommendations) == 5:
             break
     return recommendations
-
-# --- Get unique genres for dropdown ---
-def get_all_genres():
-    genre_set = set()
-    for g_list in new_df['genres']:
-        genre_set.update(g_list)
-    return sorted(genre_set)
