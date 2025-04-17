@@ -3,22 +3,38 @@ import ast
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Load and merge datasets
+# Load data
 movies = pd.read_csv('dataset/tmdb_5000_movies.csv')
 credits = pd.read_csv('dataset/tmdb_5000_credits.csv')
 credits.columns = ['id', 'title', 'cast', 'crew']
 movies = movies.merge(credits, on='title')
+
+# Rename the id_x column to movie_id
 movies.rename(columns={'id_x': 'movie_id'}, inplace=True)
 
-# Select required columns
+# Clean column names
+movies.columns = movies.columns.str.strip()
+
+# Select relevant columns
 movies = movies[['movie_id', 'title', 'overview', 'genres', 'keywords', 'cast', 'crew']]
 
-# Helper functions to process JSON-like strings
+# Functions to convert JSON-like columns
 def convert(obj):
-    return [i['name'] for i in ast.literal_eval(obj)]
+    L = []
+    for i in ast.literal_eval(obj):
+        L.append(i['name'])
+    return L
 
 def convert_cast(obj):
-    return [i['name'] for i in ast.literal_eval(obj)[:3]]
+    L = []
+    count = 0
+    for i in ast.literal_eval(obj):
+        if count < 3:
+            L.append(i['name'])
+            count += 1
+        else:
+            break
+    return L
 
 def fetch_director(obj):
     for i in ast.literal_eval(obj):
@@ -34,17 +50,20 @@ movies['cast'] = movies['cast'].apply(convert_cast)
 movies['crew'] = movies['crew'].apply(fetch_director)
 movies['overview'] = movies['overview'].apply(lambda x: x.split())
 
-# Combine all tags into a single string
+# Combine tags
 movies['tags'] = movies['overview'] + movies['genres'] + movies['keywords'] + movies['cast'] + movies['crew']
 new_df = movies[['movie_id', 'title', 'tags']]
-new_df['tags'] = new_df['tags'].apply(lambda x: " ".join(x).lower())
+new_df['tags'] = new_df['tags'].apply(lambda x: " ".join(x))
+new_df['tags'] = new_df['tags'].apply(lambda x: x.lower())
 
-# Vectorization and similarity computation
+# Vectorization
 cv = CountVectorizer(max_features=5000, stop_words='english')
 vectors = cv.fit_transform(new_df['tags']).toarray()
+
+# Similarity Matrix
 similarity = cosine_similarity(vectors)
 
-# Recommendation function
+# Recommendation Function
 def recommend(movie):
     movie = movie.lower()
     if movie not in new_df['title'].str.lower().values:
