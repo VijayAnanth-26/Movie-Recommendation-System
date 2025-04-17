@@ -54,7 +54,7 @@ movies['overview'] = movies['overview'].apply(lambda x: x.split())
 movies['tags'] = movies['overview'] + movies['genres'] + movies['keywords'] + movies['cast'] + movies['crew']
 new_df = movies[['movie_id', 'title', 'tags']]
 new_df['tags'] = new_df['tags'].apply(lambda x: " ".join(x))
-new_df['tags'] = new_df['tags'].apply(lambda x: x.lower())
+new_df['tags'] = new_df['tags'].str.lower()
 
 # Vectorization
 cv = CountVectorizer(max_features=5000, stop_words='english')
