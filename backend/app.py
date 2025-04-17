@@ -1,5 +1,5 @@
 import streamlit as st
-from recommend import recommend, get_all_genres
+from recommend import recommend
 
 st.set_page_config(page_title="🎬 Movie Recommender", page_icon="🎥", layout="wide")
 
@@ -40,10 +40,6 @@ st.markdown("""
         color: #ffffff;
         border: 1px solid #444;
     }
-    .stSelectbox > div > div {
-        background-color: #2c2c2c !important;
-        color: #ffffff !important;
-    }
     .stButton>button {
         background-color: #444444;
         color: white;
@@ -59,10 +55,6 @@ st.markdown('<div class="subtitle-style">Enter a movie you like, and get 5 simil
 
 # --- Input Section ---
 movie_name = st.text_input('🔍 Enter a Movie Name', placeholder="e.g. Inception, Titanic, The Matrix")
-
-genres = get_all_genres()
-selected_genre = st.selectbox("🎯 Filter by Genre (Optional):", options=["All"] + genres)
-
 col1, col2 = st.columns([1, 5])
 with col1:
     recommend_clicked = st.button("🚀 Recommend")
@@ -71,16 +63,13 @@ with col1:
 if recommend_clicked:
     if movie_name:
         with st.spinner("🔎 Finding similar movies..."):
-            genre_filter = None if selected_genre == "All" else selected_genre
-            recommendations = recommend(movie_name, selected_genre=genre_filter)
+            recommendations = recommend(movie_name)
 
         if recommendations[0] == "Movie not found!":
             st.error("❌ Movie not found! Please try a different title.")
         else:
             st.markdown("---")
-            st.success(f"🎉 Top 5 Recommendations for **'{movie_name.title()}'**" +
-                       (f" in genre **'{selected_genre}'**" if genre_filter else "") + ":")
-
+            st.success(f"🎉 Top 5 Recommendations for **'{movie_name.title()}'**:")
             for idx, title in enumerate(recommendations, 1):
                 st.markdown(f"""<div class="movie-box">
                     <h5>🎬 {idx}. {title}</h5>
