@@ -2,4 +2,3 @@ pandas
 scikit-learn
 streamlit
 astunparse
-sample
